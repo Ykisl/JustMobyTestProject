@@ -12,3 +12,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d60b155f47531142b73edefdfe46bf1, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: 
+  _avalibleCubes:
+  - _id: Cube_DarkRed
+    _color: {r: 0.5568628, g: 0.039215688, b: 0.1254902, a: 1}
+  - _id: Cube_Red
+    _color: {r: 0.9294118, g: 0.1764706, b: 0.20392159, a: 1}
+  - _id: Cube_Orange
+    _color: {r: 0.9215687, g: 0.45098042, b: 0.1137255, a: 1}
+  - _id: Cube_Yellow
+    _color: {r: 0.9803922, g: 0.8078432, b: 0.18431373, a: 1}
+  - _id: Cube_Green
+    _color: {r: 0.0627451, g: 0.6117647, b: 0.18431373, a: 1}
+  - _id: Cube_SkyBlue
+    _color: {r: 0.058823533, g: 0.60784316, b: 0.92549026, a: 1}
+  - _id: Cube_Blue
+    _color: {r: 0.2509804, g: 0.2784314, b: 0.74509805, a: 1}
+  - _id: Cube_Purple
+    _color: {r: 0.61960787, g: 0.21568629, b: 0.61960787, a: 1}
+  - _id: Cube_LightGray
+    _color: {r: 0.6392157, g: 0.6392157, b: 0.6392157, a: 1}
+  - _id: Cube_Brown
+    _color: {r: 0.6431373, g: 0.36862746, b: 0.27450982, a: 1}
+  - _id: Cube_DarkGray
+    _color: {r: 0.34509805, g: 0.34509805, b: 0.34509805, a: 1}
+  - _id: Cube_Black
+    _color: {r: 0, g: 0, b: 0, a: 1}
+  - _id: Cube_Pink
+    _color: {r: 1, g: 0.46855342, b: 0.9471225, a: 1}
+  - _id: Cube_White
+    _color: {r: 1, g: 1, b: 1, a: 1}
+  - _id: Cube_Lime
+    _color: {r: 0.24991798, g: 1, b: 0, a: 1}
+  - _id: Cube_Gold
+    _color: {r: 1, g: 0.7569028, b: 0, a: 1}
+  - _id: Cube_LightGreen
+    _color: {r: 0.7254902, g: 0.8862745, b: 0.54901963, a: 1}
+  - _id: Cube_UltraViolet
+    _color: {r: 0.35686275, g: 0.3137255, b: 0.47843137, a: 1}
+  - _id: Cube_RoyalBlue
+    _color: {r: 0.039215688, g: 0.14117648, b: 0.3882353, a: 1}
+  - _id: Cube_Cerulean
+    _color: {r: 0.14117648, g: 0.48235294, b: 0.627451, a: 1}
