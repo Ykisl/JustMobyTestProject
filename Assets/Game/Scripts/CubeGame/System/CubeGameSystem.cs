@@ -1,8 +1,8 @@
 using Game.Config;
+using Game.CubeGame.Cube;
 using Game.CubeGame.Models;
 using Game.CubeGame.Palette;
 using System.Collections.Generic;
-using System.Linq;
 using Zenject;
 
 namespace Game.CubeGame.System
@@ -11,49 +11,26 @@ namespace Game.CubeGame.System
     {
         protected IGameConfig _gameConfig;
         protected ICubePaletteSystem _cubePaletteSystem;
-
-        protected List<CubeModel> _cubeModels;
+        protected ICubeSystem _cubeSystem;
 
         [Inject]
         private void Construct(
             IGameConfig gameConfig,
-            ICubePaletteSystem cubePaletteSystem
+            ICubePaletteSystem cubePaletteSystem,
+            ICubeSystem cubeSystem
             )
         {
             _gameConfig = gameConfig;
             _cubePaletteSystem = cubePaletteSystem;
+            _cubeSystem = cubeSystem;
         }
 
         public virtual void Initialize()
         {
-            InitializeAvalibleCubes(_gameConfig.AvalibleCubes);
+            var avalibleCubes = new List<CubeModel>(_gameConfig.AvalibleCubes);
 
-            _cubePaletteSystem.Initialzie(_cubeModels);
+            _cubeSystem.Initialize(avalibleCubes);
+            _cubePaletteSystem.Initialzie(avalibleCubes);
         }
-
-        #region Internal
-
-        protected void InitializeAvalibleCubes(IReadOnlyCollection<CubeModel> cubeModels)
-        {
-            _cubeModels ??= new List<CubeModel>();
-            _cubeModels.Clear();
-
-            _cubeModels.AddRange(cubeModels);
-        }
-
-        protected bool TryGetCubeModel(string cubeId, out CubeModel cubeModel)
-        {
-            cubeModel = null;
-
-            if (_cubeModels == null || _cubeModels.Count <= 0) 
-            {
-                return false;
-            }
-
-            cubeModel = _cubeModels.FirstOrDefault(x => x.Id == cubeId);
-            return cubeModel != null;
-        }
-
-        #endregion
     }
 }
