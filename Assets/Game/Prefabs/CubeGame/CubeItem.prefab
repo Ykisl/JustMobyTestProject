@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6227196254006787978}
   - component: {fileID: 7989187906703250510}
+  - component: {fileID: 6724820210713571974}
   m_Layer: 5
   m_Name: CubeItem
   m_TagString: Untagged
@@ -51,6 +52,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _itemView: {fileID: 5458600980390752488}
   _rectTransform: {fileID: 6227196254006787978}
+  _fadeCanvasGorup: {fileID: 6724820210713571974}
+  _fadeOutTime: 0.3
+--- !u!225 &6724820210713571974
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7457503993945771585}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1001 &3365836476871097588
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -5,7 +5,7 @@ namespace Game.Drag
 {
     public interface IDragSystem
     {
-        event Action OnDragFreeFinished;
+        event Action<IDraggable> OnDragFreeFinished;
 
         bool TryStartDrag(IDraggable draggable, Vector2 mouseOffset);
         bool IsDragAvalible();

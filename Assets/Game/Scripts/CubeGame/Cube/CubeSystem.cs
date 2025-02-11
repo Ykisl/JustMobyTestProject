@@ -1,5 +1,6 @@
 using Game.CubeGame.Models;
 using Game.GamePool;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -68,6 +69,8 @@ namespace Game.CubeGame.Cube
                 return;
             }
 
+            cube.OnRemove -= HandleCubeRemove;
+
             cube.SetModel(null);
             _cubePool.Recycle(cube.gameObject);
         }
@@ -79,9 +82,16 @@ namespace Game.CubeGame.Cube
             var newCubeObject = _cubePool?.Take();
             var newCube = newCubeObject.GetComponent<CubeController>();
             newCube?.SetModel(cubeModel);
+            newCube.OnRemove += HandleCubeRemove;
+
             newCube.gameObject.SetActive(true);
 
             return newCube;
+        }
+
+        private void HandleCubeRemove(CubeController cube)
+        {
+            RemoveCube(cube);
         }
 
         protected void InitializeAvalibleCubes(IReadOnlyCollection<CubeModel> cubeModels)

@@ -16,7 +16,7 @@ namespace Game.Drag
 
         protected RectTransform _dragRect;
 
-        public event Action OnDragFreeFinished;
+        public event Action<IDraggable> OnDragFreeFinished;
 
         [Inject]
         private void Consturt(IPointerSystem pointerSystem)
@@ -112,7 +112,10 @@ namespace Game.Drag
             _currentDraggable.DraggableTransform.SetParent(_draggableOriginalParent);
             _currentDraggable.DraggableTransform.position = point;
 
+            var draggable = _currentDraggable;
+
             ClearDraggable();
+            OnDragFreeFinished?.Invoke(draggable);
         }
 
         protected virtual void ClearDraggable()

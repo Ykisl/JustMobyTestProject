@@ -2,6 +2,8 @@ using Game.Config;
 using Game.CubeGame.Cube;
 using Game.CubeGame.Models;
 using Game.CubeGame.Palette;
+using Game.Drag;
+using System;
 using System.Collections.Generic;
 using Zenject;
 
@@ -12,17 +14,20 @@ namespace Game.CubeGame.System
         protected IGameConfig _gameConfig;
         protected ICubePaletteSystem _cubePaletteSystem;
         protected ICubeSystem _cubeSystem;
+        protected IDragSystem _dragSystem;
 
         [Inject]
         private void Construct(
             IGameConfig gameConfig,
             ICubePaletteSystem cubePaletteSystem,
-            ICubeSystem cubeSystem
+            ICubeSystem cubeSystem,
+            IDragSystem dragSystem
             )
         {
             _gameConfig = gameConfig;
             _cubePaletteSystem = cubePaletteSystem;
             _cubeSystem = cubeSystem;
+            _dragSystem = dragSystem;
         }
 
         public virtual void Initialize()
@@ -31,6 +36,23 @@ namespace Game.CubeGame.System
 
             _cubeSystem.Initialize(avalibleCubes);
             _cubePaletteSystem.Initialzie(avalibleCubes);
+
+            _dragSystem.OnDragFreeFinished += HandleDragFreeFinished;
+        }
+
+        public virtual void Deinitialize()
+        {
+            _dragSystem.OnDragFreeFinished -= HandleDragFreeFinished;
+        }
+
+        private void HandleDragFreeFinished(IDraggable draggable)
+        {
+            if(draggable is not CubeController cube)
+            {
+                return;
+            }
+
+            cube.RemoveWithFade();
         }
     }
 }
