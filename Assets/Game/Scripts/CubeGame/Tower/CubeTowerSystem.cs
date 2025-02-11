@@ -121,17 +121,25 @@ namespace Game.CubeGame.Tower
 
             var newCubePosition = topPosition;
             newCubePosition.y += cube.CubeRect.height / 2;
-            newCubePosition.x += GetCubeHorizontalOffset(cube);
+
+            var newRect = cube.CubeRect;
+            newRect.center = newCubePosition;
+            newCubePosition.x += GetCubeHorizontalOffset(newRect);
 
             return newCubePosition;
         }
 
-        protected virtual float GetCubeHorizontalOffset(TowerCubeData cube)
+        protected virtual float GetCubeHorizontalOffset(Rect cubeRect)
         {
-            var cubeRect = cube.CubeRect;
             var halfSize = cubeRect.width / 2;
 
-            var ofsset = UnityEngine.Random.Range(-halfSize, halfSize);
+            var leftMaxSize = cubeRect.xMin - _towerRect.xMin;
+            leftMaxSize = Mathf.Min(leftMaxSize, halfSize);
+
+            var rightMaxSize = _towerRect.xMax - cubeRect.xMax;
+            rightMaxSize = Mathf.Min(rightMaxSize, halfSize);
+
+            var ofsset = UnityEngine.Random.Range(-leftMaxSize, rightMaxSize);
             return ofsset;
         }
 
