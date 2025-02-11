@@ -131,6 +131,7 @@ namespace Game.GamePool
         protected virtual void RecycleInternal(GameObject item)
         {
             item.gameObject.SetActive(false);
+            item.transform.SetParent(_rootGameObject.transform);
 
             item.transform.position = Vector3.zero;
             item.transform.rotation = Quaternion.identity;

@@ -1,7 +1,9 @@
 
 using Game.Pointer;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Zenject;
 
 namespace Game.Drag
@@ -109,9 +111,24 @@ namespace Game.Drag
             RectTransformUtility.ScreenPointToWorldPointInRectangle(_dragRect, position, null, out var point);
             point -= (Vector3)_draggableOffset;
 
-            _currentDraggable.DraggableTransform.SetParent(_draggableOriginalParent);
             _currentDraggable.DraggableTransform.position = point;
+            var targetScreenPoint = RectTransformUtility.WorldToScreenPoint(null, point);
 
+            if(TryGetDropTarget(targetScreenPoint, out var dropTarget))
+            {
+                var targetTransform = dropTarget.TargetDropTransform;
+
+                RectTransformUtility.ScreenPointToWorldPointInRectangle(targetTransform, targetScreenPoint, null, out var localPoint);
+                _currentDraggable.DraggableTransform.SetParent(targetTransform);
+
+                if(dropTarget.TryPutDraggable(_currentDraggable, localPoint))
+                {
+                    ClearDraggable();
+                    return;
+                }
+            }
+
+            _currentDraggable.DraggableTransform.SetParent(_draggableOriginalParent);
             var draggable = _currentDraggable;
 
             ClearDraggable();
@@ -123,6 +140,34 @@ namespace Game.Drag
             _currentDraggable = null;
             _draggableOffset = Vector2.zero;
             _draggableOriginalParent = null;
+        }
+
+        private bool TryGetDropTarget(Vector2 position, out IDragTargetZone dropTarget)
+        {
+            var eventSystem = EventSystem.current;
+            if (eventSystem == null)
+            {
+                dropTarget = null;
+                return false;
+            }
+
+            var eventData = new PointerEventData(EventSystem.current);
+            eventData.position = position;
+
+            var raycastResults = new List<RaycastResult>();
+            eventSystem.RaycastAll(eventData, raycastResults);
+
+            foreach ( var raycastResult in raycastResults)
+            {
+                var gameObjeect = raycastResult.gameObject;
+                if(gameObjeect.TryGetComponent<IDragTargetZone>(out dropTarget))
+                {
+                    return true;
+                }
+            }
+
+            dropTarget = null;
+            return false;
         }
 
         protected virtual void HandlePointerMove(PointerData data)

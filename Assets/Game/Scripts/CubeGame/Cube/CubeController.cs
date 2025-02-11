@@ -27,7 +27,7 @@ namespace Game.CubeGame.Cube
 
         public Transform DraggableTransform => _rectTransform;
 
-        public bool IsDragAvalible => _fadeSequence == null || !_fadeSequence.IsPlaying();
+        public bool IsDragAvalible => _fadeSequence == null || !_fadeSequence.IsActive() || !_fadeSequence.IsPlaying();
 
         public event Action<CubeController> OnRemove;
 

@@ -16,6 +16,8 @@ namespace Game.CubeGame.System
         protected ICubeSystem _cubeSystem;
         protected IDragSystem _dragSystem;
 
+        public event Action<CubeController> OnCubeDrop;
+
         [Inject]
         private void Construct(
             IGameConfig gameConfig,
@@ -43,6 +45,12 @@ namespace Game.CubeGame.System
         public virtual void Deinitialize()
         {
             _dragSystem.OnDragFreeFinished -= HandleDragFreeFinished;
+        }
+
+        public virtual void DropCube(CubeController cube)
+        {
+            OnCubeDrop?.Invoke(cube);
+            cube.Remove();
         }
 
         private void HandleDragFreeFinished(IDraggable draggable)
