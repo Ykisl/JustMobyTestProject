@@ -2,6 +2,7 @@ using Game.Config;
 using Game.CubeGame.Cube;
 using Game.CubeGame.Models;
 using Game.CubeGame.Palette;
+using Game.CubeGame.Tower;
 using Game.Drag;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace Game.CubeGame.System
         protected ICubePaletteSystem _cubePaletteSystem;
         protected ICubeSystem _cubeSystem;
         protected IDragSystem _dragSystem;
+        protected ICubeTowerSystem _cubeTowerSystem;
 
         public event Action<CubeController> OnCubeDrop;
 
@@ -23,13 +25,15 @@ namespace Game.CubeGame.System
             IGameConfig gameConfig,
             ICubePaletteSystem cubePaletteSystem,
             ICubeSystem cubeSystem,
-            IDragSystem dragSystem
+            IDragSystem dragSystem,
+            ICubeTowerSystem cubeTowerSystem
             )
         {
             _gameConfig = gameConfig;
             _cubePaletteSystem = cubePaletteSystem;
             _cubeSystem = cubeSystem;
             _dragSystem = dragSystem;
+            _cubeTowerSystem = cubeTowerSystem;
         }
 
         public virtual void Initialize()
@@ -38,6 +42,7 @@ namespace Game.CubeGame.System
 
             _cubeSystem.Initialize(avalibleCubes);
             _cubePaletteSystem.Initialzie(avalibleCubes);
+            _cubeTowerSystem.Initialize();
 
             _dragSystem.OnDragFreeFinished += HandleDragFreeFinished;
         }

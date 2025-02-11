@@ -2,6 +2,7 @@ using Game.Config;
 using Game.CubeGame.Cube;
 using Game.CubeGame.Palette;
 using Game.CubeGame.System;
+using Game.CubeGame.Tower;
 using Game.Drag;
 using Game.Pointer;
 using UnityEngine;
@@ -52,6 +53,9 @@ namespace Game.Context
 
             Container.Bind<ICubePaletteSystem>()
                 .To<CubePaletteSystem>().AsSingle();
+
+            Container.Bind<ICubeTowerSystem>()
+                .To<CubeTowerSystem>().AsSingle();
 
             Container.Bind<ICubeGameSystem>()
                 .To<CubeGameSystem>().AsSingle();

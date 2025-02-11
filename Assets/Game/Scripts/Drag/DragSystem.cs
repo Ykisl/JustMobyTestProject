@@ -118,7 +118,7 @@ namespace Game.Drag
             {
                 var targetTransform = dropTarget.TargetDropTransform;
 
-                RectTransformUtility.ScreenPointToWorldPointInRectangle(targetTransform, targetScreenPoint, null, out var localPoint);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(targetTransform, targetScreenPoint, null, out var localPoint);
                 _currentDraggable.DraggableTransform.SetParent(targetTransform);
 
                 if(dropTarget.TryPutDraggable(_currentDraggable, localPoint))
