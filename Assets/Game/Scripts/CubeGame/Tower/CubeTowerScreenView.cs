@@ -2,21 +2,23 @@ using DG.Tweening;
 using Game.CubeGame.Cube;
 using Game.Drag;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Zenject;
 
 namespace Game.CubeGame.Tower
 {
-    public class CubeTowerScreenView : UIBehaviour, IDragTargetZone
+    public class CubeTowerScreenView : UIBehaviour, IDragTargetZone, IDragStartZone
     {
         [SerializeField] private RectTransform _contentRect;
 
         private ICubeTowerSystem _cubeTowerSystem;
 
         protected Rect _viewRect = default;
+        protected Sequence _dropSequence;
 
-        public RectTransform TargetDropTransform => _contentRect;
+        public RectTransform TargetDragTransform => _contentRect;
 
         [Inject]
         private void Construct(ICubeTowerSystem cubeTowerSystem)
@@ -30,6 +32,7 @@ namespace Game.CubeGame.Tower
 
             _cubeTowerSystem.OnInitialized += HanldeSystemInitialized;
             _cubeTowerSystem.OnCubeAttached += HandleTowerCubeAttached;
+            _cubeTowerSystem.OnCubeFall += HandleTowerCubeFall;
         }
 
         protected override void OnDisable()
@@ -38,6 +41,7 @@ namespace Game.CubeGame.Tower
 
             _cubeTowerSystem.OnInitialized -= HanldeSystemInitialized;
             _cubeTowerSystem.OnCubeAttached -= HandleTowerCubeAttached;
+            _cubeTowerSystem.OnCubeFall -= HandleTowerCubeFall;
         }
 
         protected override void OnRectTransformDimensionsChange()
@@ -53,6 +57,30 @@ namespace Game.CubeGame.Tower
             }
 
             return _cubeTowerSystem.TryAttachCube(cube, localPosition);
+        }
+
+        public bool TryStartDrag(out IDraggable draggable, Vector2 localPosition)
+        {
+            draggable = null;
+
+            var towerCubeInPosition = _cubeTowerSystem.GetTowerCubeByPosition(localPosition);
+            if (towerCubeInPosition == null)
+            {
+                return false;
+            }
+
+            var cube = towerCubeInPosition.AttachedCube;
+            if(cube == null || !cube.IsDragAvalible)
+            {
+                return false;
+            }
+
+            _dropSequence?.Kill(true);
+            DOTween.Kill(cube.transform, true);
+
+            _cubeTowerSystem.DetachCube(towerCubeInPosition);
+            draggable = cube;
+            return true;
         }
 
         protected virtual void UpdateView()
@@ -102,7 +130,7 @@ namespace Game.CubeGame.Tower
             UpdateView();
         }
 
-        private void HandleTowerCubeAttached(TowerCubeData towerCube, Vector2 dropPosition, Vector2 targetPosition)
+        protected void HandleTowerCubeAttached(TowerCubeData towerCube, Vector2 dropPosition, Vector2 targetPosition)
         {
             var cube = towerCube.AttachedCube;
             if(cube == null)
@@ -121,8 +149,37 @@ namespace Game.CubeGame.Tower
                 return;
             }
 
+            _dropSequence?.Kill(true);
+            _dropSequence = DOTween.Sequence();
+
             var jumpTween = cubeTransform.DOLocalJump(targetPosition, 10f, 1, 0.2f);
-            jumpTween.Play();
+            _dropSequence.Append(jumpTween);
+            _dropSequence.Play();
+        }
+
+        protected void HandleTowerCubeFall(TowerCubeData towerCube, Vector2 originalPosition, Vector2 targetPosition)
+        {
+            _dropSequence?.Kill(true);
+            _dropSequence = DOTween.Sequence();
+
+            var cube = towerCube.AttachedCube;
+            if (cube == null)
+            {
+                return;
+            }
+
+            DOTween.Kill(cube.transform, true);
+
+            var cubeTransform = cube.transform;
+            CreateFallTween(cube, originalPosition, targetPosition);
+        }
+
+        protected void CreateFallTween(CubeController cube, Vector2 originalPosition, Vector2 targetPosition)
+        {
+            var cubeTransform = cube.transform;
+
+            var tween = cubeTransform.DOLocalMove(targetPosition, 0.3f).From(originalPosition);
+            tween.Play();
         }
     }
 }

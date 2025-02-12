@@ -12,10 +12,15 @@ namespace Game.CubeGame.Tower
 
         event Action OnInitialized;
         event Action<TowerCubeData, Vector2, Vector2> OnCubeAttached;
+        event Action<TowerCubeData, Vector2, Vector2> OnCubeFall;
+        event Action<TowerCubeData> OnTowerOwerflow;
 
         void Initialize();
         void SetAvalibleRect(Rect towerRect);
         bool TryAttachCube(CubeController cube, Vector2 position);
+        void DetachCube(CubeController cube);
+        void DetachCube(TowerCubeData towerCube);
+        TowerCubeData GetTowerCubeByPosition(Vector2 position);
         bool IsTowerEmpty();
     }
 }

@@ -17,7 +17,7 @@ namespace Game.CubeGame.Drop
 
         private ICubeGameSystem _cubeGameSystem; 
 
-        public RectTransform TargetDropTransform => _dropTarget;
+        public RectTransform TargetDragTransform => _dropTarget;
 
         [Inject]
         private void Construct(ICubeGameSystem cubeGameSystem)

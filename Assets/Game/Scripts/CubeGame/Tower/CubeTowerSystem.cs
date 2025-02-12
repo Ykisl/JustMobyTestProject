@@ -2,6 +2,7 @@ using Game.CubeGame.Cube;
 using Game.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Game.CubeGame.Tower
@@ -18,6 +19,8 @@ namespace Game.CubeGame.Tower
 
         public event Action OnInitialized;
         public event Action<TowerCubeData, Vector2, Vector2> OnCubeAttached;
+        public event Action<TowerCubeData, Vector2, Vector2> OnCubeFall;
+        public event Action<TowerCubeData> OnTowerOwerflow;
 
         public virtual void Initialize()
         {
@@ -60,6 +63,12 @@ namespace Game.CubeGame.Tower
 
             if (!IsTowerEmpty() && IsTowerOverflow())
             {
+                OnTowerOwerflow?.Invoke(towerCube);
+                return false;
+            }
+
+            if(!IsAvalibleToAttachCube(towerCube))
+            {
                 return false;
             }
 
@@ -70,6 +79,85 @@ namespace Game.CubeGame.Tower
             OnCubeAttached?.Invoke(towerCube, dropPosition, cubeAttachPosition);
 
             return true;
+        }
+
+        public void DetachCube(CubeController cube)
+        {
+            if (!_isInitialized)
+            {
+                return;
+            }
+
+            var towerCube = GetTowerCubeFromAttachedCube(cube);
+            DetachCube(towerCube);
+        }
+
+        public virtual void DetachCube(TowerCubeData towerCube)
+        {
+            if (!_isInitialized)
+            {
+                return;
+            }
+
+            if (IsTowerEmpty() || !_towerCubes.Contains(towerCube))
+            {
+                return;
+            }
+
+            var cubeIndex = _towerCubes.IndexOf(towerCube);
+            var isRootCube = cubeIndex <= 0;
+
+            var fallRootPosition = towerCube.BottomPosition;
+            if (!isRootCube)
+            {
+                var bottomCube = _towerCubes[cubeIndex - 1];
+                fallRootPosition = bottomCube.TopPosition;
+            }
+
+            for(int i = cubeIndex+1; i < _towerCubes.Count; i++)
+            {
+                var cubeAbove = _towerCubes[i];
+
+                var originialPosiion = cubeAbove.Position;
+                var halfSize = cubeAbove.CubeRect.size/ 2;
+
+                var xOffset = originialPosiion.x - fallRootPosition.x;
+
+                var targetPosition = fallRootPosition;
+                targetPosition.y += halfSize.y;
+                targetPosition.x = Mathf.Clamp(targetPosition.x + xOffset, fallRootPosition.x - halfSize.x, fallRootPosition.x + halfSize.x);
+
+
+                cubeAbove.Position = targetPosition;
+                fallRootPosition = cubeAbove.TopPosition;
+
+                OnCubeFall?.Invoke(cubeAbove, originialPosiion, targetPosition);
+            }
+
+            _towerCubes.RemoveAt(cubeIndex);
+        }
+
+        public virtual TowerCubeData GetTowerCubeByPosition(Vector2 position)
+        {
+            if (!_isInitialized)
+            {
+                return null;
+            }
+
+            if (IsTowerEmpty())
+            {
+                return null;
+            }
+
+            foreach (var towerCube in _towerCubes)
+            {
+                if (towerCube.CubeRect.Contains(position))
+                {
+                    return towerCube;
+                }
+            }
+
+            return null;
         }
 
         public virtual bool IsTowerEmpty()
@@ -102,6 +190,30 @@ namespace Game.CubeGame.Tower
                 AttachedCube = cube,
                 CubeRect = cubeRect,
             };
+        }
+
+        protected virtual bool IsAvalibleToAttachCube(TowerCubeData cube)
+        {
+            if (!_isInitialized)
+            {
+                return false;
+            }
+
+            if (IsTowerEmpty())
+            {
+                return true;
+            }
+
+            var cubeRect = cube.CubeRect;
+            foreach(var towerCube in _towerCubes)
+            {
+                if (cubeRect.Overlaps(towerCube.CubeRect))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         protected virtual bool IsCubeInArea(TowerCubeData cube)
@@ -154,6 +266,17 @@ namespace Game.CubeGame.Tower
             var topPosition = lastCube.TopPosition;
 
             return topPosition;
+        }
+
+        protected TowerCubeData GetTowerCubeFromAttachedCube(CubeController attachedCube)
+        {
+            if (IsTowerEmpty())
+            {
+                return null;
+            }
+
+            var towerCube = _towerCubes.FirstOrDefault(x => x.AttachedCube == attachedCube);
+            return towerCube;
         }
     }
 }

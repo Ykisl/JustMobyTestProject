@@ -38,12 +38,14 @@ namespace Game.Drag
 
             _pointerSystem.OnPointerMove += HandlePointerMove;
             _pointerSystem.OnPointerReleased += HandlePointerReleased;
+            _pointerSystem.OnPointerPressed += HandlePointerPressed;
         }
 
         public virtual void Dispose()
         {
             _pointerSystem.OnPointerMove -= HandlePointerMove;
             _pointerSystem.OnPointerReleased -= HandlePointerReleased;
+            _pointerSystem.OnPointerPressed -= HandlePointerPressed;
 
             _currentDraggable = null;
             _draggableOffset = Vector2.zero;
@@ -75,6 +77,39 @@ namespace Game.Drag
 
             var pointerInfo = _pointerSystem.PointerInfo;
             return pointerInfo.IsPointerPressed && !pointerInfo.IsPointerReleased;
+        }
+
+        protected virtual void TakeDraggable()
+        {
+            if (!IsDragAvalible())
+            {
+                return;
+            }
+
+            var pointerInfo = _pointerSystem.PointerInfo;
+            var position = pointerInfo.CurrentPosition;
+
+            if(!TryGetDragTarget<IDragStartZone>(position, out var startDragTarget))
+            {
+                return;
+            }
+
+            var targetTransform = startDragTarget.TargetDragTransform;
+            if(targetTransform == null)
+            {
+                return;
+            }
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(targetTransform, position, null, out var localPoint);
+            if (!startDragTarget.TryStartDrag(out var draggable, localPoint) || draggable == null || !draggable.IsDragAvalible)
+            {
+                return;
+            }
+
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(_dragRect, position, null, out var mousePoint);
+
+            var offset = draggable.DraggableTransform.position - mousePoint;
+            TryStartDrag(draggable, offset);
         }
 
         protected virtual void UpdateDraggable()
@@ -114,9 +149,9 @@ namespace Game.Drag
             _currentDraggable.DraggableTransform.position = point;
             var targetScreenPoint = RectTransformUtility.WorldToScreenPoint(null, point);
 
-            if(TryGetDropTarget(targetScreenPoint, out var dropTarget))
+            if(TryGetDragTarget<IDragTargetZone>(targetScreenPoint, out var dropTarget))
             {
-                var targetTransform = dropTarget.TargetDropTransform;
+                var targetTransform = dropTarget.TargetDragTransform;
 
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(targetTransform, targetScreenPoint, null, out var localPoint);
                 _currentDraggable.DraggableTransform.SetParent(targetTransform);
@@ -142,12 +177,12 @@ namespace Game.Drag
             _draggableOriginalParent = null;
         }
 
-        private bool TryGetDropTarget(Vector2 position, out IDragTargetZone dropTarget)
+        protected bool TryGetDragTarget<T>(Vector2 position, out T targetZone) where T : class
         {
             var eventSystem = EventSystem.current;
             if (eventSystem == null)
             {
-                dropTarget = null;
+                targetZone = default;
                 return false;
             }
 
@@ -160,13 +195,13 @@ namespace Game.Drag
             foreach ( var raycastResult in raycastResults)
             {
                 var gameObjeect = raycastResult.gameObject;
-                if(gameObjeect.TryGetComponent<IDragTargetZone>(out dropTarget))
+                if(gameObjeect.TryGetComponent<T>(out targetZone))
                 {
                     return true;
                 }
             }
 
-            dropTarget = null;
+            targetZone = null;
             return false;
         }
 
@@ -179,6 +214,11 @@ namespace Game.Drag
         {
             UpdateDraggable();
             ReleaseDraggable();
+        }
+
+        protected virtual void HandlePointerPressed(PointerData data)
+        {
+            TakeDraggable();
         }
     }
 }
