@@ -1,14 +1,19 @@
 using Game.CubeGame.Cube;
 using Game.Extensions;
+using Game.Save;
+using Game.Save.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Zenject;
 
 namespace Game.CubeGame.Tower
 {
-    public class CubeTowerSystem : ICubeTowerSystem
+    public class CubeTowerSystem : ICubeTowerSystem, ISavable
     {  
+        protected ICubeSystem _cubeSystem;
+
         private bool _isInitialized;
         protected Rect _towerRect;
 
@@ -17,10 +22,20 @@ namespace Game.CubeGame.Tower
         public bool IsInitialzied => _isInitialized;
         public IList<TowerCubeData> ActiveTowerCubes => _towerCubes;
 
+        public int SaveDataLoadPriority => 0;
+
         public event Action OnInitialized;
         public event Action<TowerCubeData, Vector2, Vector2> OnCubeAttached;
         public event Action<TowerCubeData, Vector2, Vector2> OnCubeFall;
         public event Action<TowerCubeData> OnTowerOwerflow;
+        public event Action OnSaveRequested;
+        public event Action OnTowerRebuild;
+
+        [Inject]
+        private void Construct(ICubeSystem cubeSystem)
+        {
+            _cubeSystem = cubeSystem;
+        }
 
         public virtual void Initialize()
         {
@@ -36,6 +51,65 @@ namespace Game.CubeGame.Tower
 
             _isInitialized = true;
             OnInitialized?.Invoke();
+        }
+
+        public void OnLoadState(ILoadContext context)
+        {
+            if (!_isInitialized)
+            {
+                return;
+            }
+
+            foreach(var towerCube in _towerCubes)
+            {
+                towerCube?.AttachedCube?.Remove();
+            }
+
+            _towerCubes.Clear();
+
+            var saveData = context.GetData<CubeGameTowerSaveData>();
+            if(saveData == null)
+            {
+                OnTowerRebuild?.Invoke();
+                return;
+            }
+
+            foreach(var savedCube in saveData.Cubes)
+            {
+                var cube = _cubeSystem.CreateCube(savedCube.ModelId);
+                if(cube == null)
+                {
+                    continue;
+                }
+
+                var towerCube = CreateTowerCube(cube, savedCube.Position);
+                _towerCubes.Add(towerCube);
+            }
+
+            OnTowerRebuild?.Invoke();
+        }
+
+        public void OnSaveState(ISaveContext context)
+        {
+            if (!_isInitialized)
+            {
+                return;
+            }
+
+            var saveState = new CubeGameTowerSaveData();
+            foreach (var towerCube in _towerCubes)
+            {
+                var cubeModel = towerCube.AttachedCube.Model;
+                var cubeData = new CubeGameTowerSaveDataCube
+                {
+                    ModelId = cubeModel.Id,
+                    Position = towerCube.Position
+                };
+
+                saveState.Cubes.Add(cubeData);
+            }
+
+            context.SetData(saveState);
         }
 
         public virtual void SetAvalibleRect(Rect towerRect)
@@ -77,6 +151,7 @@ namespace Game.CubeGame.Tower
 
             _towerCubes?.Add(towerCube);
             OnCubeAttached?.Invoke(towerCube, dropPosition, cubeAttachPosition);
+            OnSaveRequested?.Invoke();
 
             return true;
         }
@@ -135,6 +210,7 @@ namespace Game.CubeGame.Tower
             }
 
             _towerCubes.RemoveAt(cubeIndex);
+            OnSaveRequested?.Invoke();
         }
 
         public virtual TowerCubeData GetTowerCubeByPosition(Vector2 position)

@@ -33,6 +33,7 @@ namespace Game.CubeGame.Tower
             _cubeTowerSystem.OnInitialized += HanldeSystemInitialized;
             _cubeTowerSystem.OnCubeAttached += HandleTowerCubeAttached;
             _cubeTowerSystem.OnCubeFall += HandleTowerCubeFall;
+            _cubeTowerSystem.OnTowerRebuild += HandleTowerRebuild;
         }
 
         protected override void OnDisable()
@@ -42,6 +43,7 @@ namespace Game.CubeGame.Tower
             _cubeTowerSystem.OnInitialized -= HanldeSystemInitialized;
             _cubeTowerSystem.OnCubeAttached -= HandleTowerCubeAttached;
             _cubeTowerSystem.OnCubeFall -= HandleTowerCubeFall;
+            _cubeTowerSystem.OnTowerRebuild -= HandleTowerRebuild;
         }
 
         protected override void OnRectTransformDimensionsChange()
@@ -120,6 +122,8 @@ namespace Game.CubeGame.Tower
                 var attachedCube = towerCube.AttachedCube;
 
                 var cubeTransform = attachedCube.transform;
+                DOTween.Kill(cubeTransform, true);
+
                 cubeTransform.SetParent(_contentRect);
                 cubeTransform.localPosition = towerCube.Position;
             }
@@ -128,6 +132,14 @@ namespace Game.CubeGame.Tower
         protected virtual void HanldeSystemInitialized()
         {
             UpdateView();
+        }
+
+        protected void CreateFallTween(CubeController cube, Vector2 originalPosition, Vector2 targetPosition)
+        {
+            var cubeTransform = cube.transform;
+
+            var tween = cubeTransform.DOLocalMove(targetPosition, 0.3f).From(originalPosition);
+            tween.Play();
         }
 
         protected void HandleTowerCubeAttached(TowerCubeData towerCube, Vector2 dropPosition, Vector2 targetPosition)
@@ -174,12 +186,9 @@ namespace Game.CubeGame.Tower
             CreateFallTween(cube, originalPosition, targetPosition);
         }
 
-        protected void CreateFallTween(CubeController cube, Vector2 originalPosition, Vector2 targetPosition)
+        private void HandleTowerRebuild()
         {
-            var cubeTransform = cube.transform;
-
-            var tween = cubeTransform.DOLocalMove(targetPosition, 0.3f).From(originalPosition);
-            tween.Play();
+            UpdateView();
         }
     }
 }

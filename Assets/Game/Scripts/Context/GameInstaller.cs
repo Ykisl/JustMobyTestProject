@@ -5,6 +5,7 @@ using Game.CubeGame.System;
 using Game.CubeGame.Tower;
 using Game.Drag;
 using Game.Pointer;
+using Game.Save;
 using UnityEngine;
 using Zenject;
 
@@ -34,6 +35,9 @@ namespace Game.Context
                 .WithArguments(_dragRect)
                 .NonLazy();
 
+            Container.BindInterfacesAndSelfTo<SaveSystem>()
+                .AsSingle();
+
             RegisterGameSystems();
 
             RegisterEntryPoint();
@@ -54,8 +58,8 @@ namespace Game.Context
             Container.Bind<ICubePaletteSystem>()
                 .To<CubePaletteSystem>().AsSingle();
 
-            Container.Bind<ICubeTowerSystem>()
-                .To<CubeTowerSystem>().AsSingle();
+            Container.BindInterfacesAndSelfTo<CubeTowerSystem>()
+                .AsSingle();
 
             Container.Bind<ICubeGameSystem>()
                 .To<CubeGameSystem>().AsSingle();

@@ -20,6 +20,11 @@ namespace Game.CubeGame.Cube
 
         private Sequence _fadeSequence;
 
+        public CubeModel Model
+        {
+            get => _model;
+        }
+
         public Rect CubeRect
         {
             get => _rectTransform.rect;

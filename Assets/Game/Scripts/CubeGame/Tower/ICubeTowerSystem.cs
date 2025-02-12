@@ -14,6 +14,7 @@ namespace Game.CubeGame.Tower
         event Action<TowerCubeData, Vector2, Vector2> OnCubeAttached;
         event Action<TowerCubeData, Vector2, Vector2> OnCubeFall;
         event Action<TowerCubeData> OnTowerOwerflow;
+        event Action OnTowerRebuild;
 
         void Initialize();
         void SetAvalibleRect(Rect towerRect);
