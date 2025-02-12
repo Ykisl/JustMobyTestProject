@@ -7,6 +7,7 @@ namespace Game.CubeGame.System
     public interface ICubeGameSystem
     {
         event Action<CubeController> OnCubeDrop;
+        event Action<CubeController> OnCubeDisappeared;
 
         void Initialize();
         void Deinitialize();

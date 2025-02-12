@@ -72,6 +72,8 @@ namespace Game.Save
             {
                 target.OnLoadState(dataFormater);
             }
+
+            OnSaveStateLoaded?.Invoke();
         }
 
         public void SaveState()

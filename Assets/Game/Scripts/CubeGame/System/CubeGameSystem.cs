@@ -19,6 +19,7 @@ namespace Game.CubeGame.System
         protected ICubeTowerSystem _cubeTowerSystem;
 
         public event Action<CubeController> OnCubeDrop;
+        public event Action<CubeController> OnCubeDisappeared;
 
         [Inject]
         private void Construct(
@@ -66,6 +67,7 @@ namespace Game.CubeGame.System
             }
 
             cube.RemoveWithFade();
+            OnCubeDisappeared?.Invoke(cube);
         }
     }
 }

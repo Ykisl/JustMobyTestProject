@@ -138,7 +138,8 @@ namespace Game.CubeGame.Tower
             if (!IsTowerEmpty() && IsTowerOverflow())
             {
                 OnTowerOwerflow?.Invoke(towerCube);
-                return false;
+                towerCube.AttachedCube.RemoveWithFade();
+                return true;
             }
 
             if(!IsAvalibleToAttachCube(towerCube))

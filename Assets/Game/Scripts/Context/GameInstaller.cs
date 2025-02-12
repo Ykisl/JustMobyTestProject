@@ -1,5 +1,6 @@
 using Game.Config;
 using Game.CubeGame.Cube;
+using Game.CubeGame.GameMessage;
 using Game.CubeGame.Palette;
 using Game.CubeGame.System;
 using Game.CubeGame.Tower;
@@ -59,6 +60,9 @@ namespace Game.Context
                 .To<CubePaletteSystem>().AsSingle();
 
             Container.BindInterfacesAndSelfTo<CubeTowerSystem>()
+                .AsSingle();
+
+            Container.BindInterfacesAndSelfTo<CubeGameMessageSystem>()
                 .AsSingle();
 
             Container.Bind<ICubeGameSystem>()
